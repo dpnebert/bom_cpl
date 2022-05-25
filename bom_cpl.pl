@@ -14,6 +14,9 @@ if (scalar(@ARGV) != 2) {
 my $project = $ARGV[0];
 my $full_path = $ARGV[1];
 
+chomp($project);
+chomp($full_path);
+
 print "\nProject: \"$project\"\n";
 print "\nProject Location: \"$full_path\"\n";
 
@@ -21,6 +24,8 @@ print "\nProject Location: \"$full_path\"\n";
 my $filename;
 opendir ( DIR, $full_path ) || die "Error in opening dir $full_path\n";
 while($filename = readdir(DIR)) {
+	chomp($filename);
+   print("Checking File: $filename\n");
    next if -d $filename;
    if($filename eq ("PnP_$project"."_front.csv")) {
 		print("Current File: $filename\n");
@@ -57,11 +62,11 @@ while($filename = readdir(DIR)) {
 		
 		
 		
-   } elsif($filename eq "$project.csv") {
+   } elsif($filename eq "BOM_$project.csv") {
 		print("Current File: $filename\n");
 		print("Current Path: $full_path\\$filename\n");		
 	
-		open(FH, '<', $full_path . '\\' . $filename) or die $!;
+		open(FH, '<', $full_path . '\\' . "BOM_$project.csv") or die $!;
 		my @lines = <FH>;
 		shift(@lines);
 		close(FH);		
@@ -69,12 +74,16 @@ while($filename = readdir(DIR)) {
 		my @output = ();
 		foreach my $line (@lines) {
 			chomp($line);
+			$line =~ s/"//g;
+			$line =~ s/;/,/g;
+			print "Modified line: " . $line . "\n";
 			my @columns = split(',', $line);
 			my $out = "";
-			if($columns[1] eq '') {
-				$out = "0,";
-			} else {
+			if(defined $columns[1] || $columns[1] ne '') {
 				$out = $columns[1].",";
+				
+			} else {
+				$out = "0,";
 			}
 			for(my $i = 0; $i < $columns[0]; $i++) {
 				my $str = $columns[4+$i];
@@ -86,7 +95,7 @@ while($filename = readdir(DIR)) {
 			
 			push(@output, $out);
 		}
-		my $output_path = $full_path . '\\' . "JLCPCB_BOM_".$filename;
+		my $output_path = $full_path . '\\' . "JLCPCB_".$filename;
 		print "Writing to output file:" . $output_path . "\n";
 		open(FH, '>', $output_path) or die $!;
 		print FH "Comment,Designator,Footprint\n";
