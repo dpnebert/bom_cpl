@@ -14,7 +14,7 @@ if (scalar(@ARGV) != 2) {
 my $project = $ARGV[0];
 my $full_path = $ARGV[1];
 
-print "\nProject: \"$full_path\"\n";
+print "\nProject: \"$project\"\n";
 print "\nProject Location: \"$full_path\"\n";
 
 
